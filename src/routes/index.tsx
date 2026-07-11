@@ -11,15 +11,16 @@ import { AddCategoryDialog } from "@/components/budget/add-category-dialog";
 import { AddGoalDialog } from "@/components/budget/add-goal-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Wallet, RotateCcw } from "lucide-react";
+import { Wallet, RotateCcw, CalendarDays, Calendar } from "lucide-react";
+import { getPeriodTitle, getPeriodLabel } from "@/components/budget/types";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Student Budget — Monthly Money Tracker" },
-      { name: "description", content: "Track income, expenses, budgets, and savings goals built for students." },
-      { property: "og:title", content: "Student Budget — Monthly Money Tracker" },
-      { property: "og:description", content: "Track income, expenses, budgets, and savings goals built for students." },
+      { title: "Student Budget — Monthly & Weekly Money Tracker" },
+      { name: "description", content: "Track income, expenses, budgets, and savings goals built for college and engineering students." },
+      { property: "og:title", content: "Student Budget — Monthly & Weekly Money Tracker" },
+      { property: "og:description", content: "Track income, expenses, budgets, and savings goals built for college and engineering students." },
     ],
   }),
   component: Index,
@@ -29,6 +30,8 @@ function Index() {
   const {
     data,
     hydrated,
+    period,
+    setPeriod,
     income,
     expenses,
     balance,
@@ -48,6 +51,7 @@ function Index() {
   const [goalOpen, setGoalOpen] = useState(false);
 
   const totalSaved = data.goals.reduce((sum, g) => sum + g.saved, 0);
+  const periodLabel = getPeriodLabel(period);
 
   if (!hydrated) {
     return (
@@ -83,7 +87,27 @@ function Index() {
               <p className="text-sm text-muted-foreground">Track every dollar. Save for what matters.</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center rounded-lg border border-border bg-card p-1">
+              <Button
+                variant={period === "monthly" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setPeriod("monthly")}
+                className={period === "monthly" ? "bg-muted text-foreground" : "text-muted-foreground"}
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                Monthly
+              </Button>
+              <Button
+                variant={period === "weekly" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setPeriod("weekly")}
+                className={period === "weekly" ? "bg-muted text-foreground" : "text-muted-foreground"}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                Weekly
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -105,11 +129,18 @@ function Index() {
           </div>
         </header>
 
-        <SummaryCards income={income} expenses={expenses} balance={balance} totalSaved={totalSaved} />
+        <SummaryCards
+          income={income}
+          expenses={expenses}
+          balance={balance}
+          totalSaved={totalSaved}
+          periodLabel={periodLabel}
+        />
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-8">
             <CategorySection
+              period={period}
               categories={categorySpending}
               totalBudget={categorySpending.reduce((sum, c) => sum + c.budget, 0)}
               onAddCategory={() => setCategoryOpen(true)}
@@ -144,7 +175,12 @@ function Index() {
         categories={data.categories}
         onAdd={addTransaction}
       />
-      <AddCategoryDialog open={categoryOpen} onOpenChange={setCategoryOpen} onAdd={addCategory} />
+      <AddCategoryDialog
+        open={categoryOpen}
+        onOpenChange={setCategoryOpen}
+        period={period}
+        onAdd={addCategory}
+      />
       <AddGoalDialog open={goalOpen} onOpenChange={setGoalOpen} onAdd={addGoal} />
     </div>
   );
