@@ -37,7 +37,7 @@ export function GoalSection({ goals, onAddGoal, onUpdateSaved, onDeleteGoal }: G
             <p className="text-sm text-muted-foreground">Create a goal to start building your savings.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-4">
             {goals.map((goal) => {
               const percent = goal.target > 0 ? Math.min((goal.saved / goal.target) * 100, 100) : 0;
               return (
