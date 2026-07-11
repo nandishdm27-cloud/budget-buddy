@@ -16,6 +16,7 @@ const CURRENT_VERSION = 1;
 function getDefaultData(): BudgetData {
   return {
     version: CURRENT_VERSION,
+    period: "monthly",
     transactions: [],
     categories: DEFAULT_CATEGORIES,
     goals: DEFAULT_GOALS,
