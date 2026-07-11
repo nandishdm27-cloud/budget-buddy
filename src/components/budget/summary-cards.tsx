@@ -7,12 +7,13 @@ interface SummaryCardsProps {
   expenses: number;
   balance: number;
   totalSaved: number;
+  periodLabel: string;
 }
 
-export function SummaryCards({ income, expenses, balance, totalSaved }: SummaryCardsProps) {
+export function SummaryCards({ income, expenses, balance, totalSaved, periodLabel }: SummaryCardsProps) {
   const items = [
     {
-      label: "Total Income",
+      label: `Income this ${periodLabel}`,
       value: income,
       icon: TrendingUp,
       color: "text-accent-cyan",
@@ -20,7 +21,7 @@ export function SummaryCards({ income, expenses, balance, totalSaved }: SummaryC
       glow: "glow-cyan",
     },
     {
-      label: "Total Expenses",
+      label: `Expenses this ${periodLabel}`,
       value: expenses,
       icon: TrendingDown,
       color: "text-accent-rose",

@@ -3,14 +3,17 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { getIcon } from "./icon-map";
 import { formatCurrency, cn } from "@/lib/utils";
-import type { Category } from "./types";
+import type { Category, BudgetPeriod } from "./types";
+import { getPeriodTitle } from "./types";
 import { Plus, Trash2 } from "lucide-react";
 
 interface CategoryWithSpending extends Category {
+  budget: number;
   spent: number;
 }
 
 interface CategorySectionProps {
+  period: BudgetPeriod;
   categories: CategoryWithSpending[];
   totalBudget: number;
   onAddCategory: () => void;
@@ -18,6 +21,7 @@ interface CategorySectionProps {
 }
 
 export function CategorySection({
+  period,
   categories,
   totalBudget,
   onAddCategory,
@@ -25,6 +29,7 @@ export function CategorySection({
 }: CategorySectionProps) {
   const totalSpent = categories.reduce((sum, c) => sum + c.spent, 0);
   const overallProgress = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+  const periodTitle = getPeriodTitle(period);
 
   return (
     <Card className="border-border bg-card">
@@ -32,7 +37,7 @@ export function CategorySection({
         <div>
           <CardTitle className="font-heading text-xl">Budget Categories</CardTitle>
           <CardDescription>
-            {formatCurrency(totalSpent)} of {formatCurrency(totalBudget)} spent
+            {formatCurrency(totalSpent)} of {formatCurrency(totalBudget)} spent this {periodTitle.toLowerCase()}
           </CardDescription>
         </div>
         <Button size="sm" onClick={onAddCategory} className="shrink-0 gradient-hero text-white border-0">
