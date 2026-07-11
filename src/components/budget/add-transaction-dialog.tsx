@@ -29,7 +29,7 @@ interface AddTransactionDialogProps {
 }
 
 export function AddTransactionDialog({ open, onOpenChange, categories, onAdd }: AddTransactionDialogProps) {
-  const [type, setType] = useState<Transaction["type"]>"expense");
+  const [type, setType] = useState<Transaction["type"]>("expense");
   const [amount, setAmount] = useState("");
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [description, setDescription] = useState("");
