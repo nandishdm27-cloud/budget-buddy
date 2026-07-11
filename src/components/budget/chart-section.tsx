@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import type { Category } from "./types";
+import type { Category, BudgetPeriod } from "./types";
+import { getPeriodTitle } from "./types";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface CategoryWithSpending extends Category {
@@ -8,6 +9,7 @@ interface CategoryWithSpending extends Category {
 }
 
 interface ChartSectionProps {
+  period: BudgetPeriod;
   categories: CategoryWithSpending[];
 }
 
@@ -19,7 +21,7 @@ const COLOR_MAP: Record<string, string> = {
   lime: "#84cc16",
 };
 
-export function ChartSection({ categories }: ChartSectionProps) {
+export function ChartSection({ period, categories }: ChartSectionProps) {
   const data = categories
     .filter((c) => c.spent > 0)
     .map((c) => ({
@@ -29,12 +31,13 @@ export function ChartSection({ categories }: ChartSectionProps) {
     }));
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
+  const periodTitle = getPeriodTitle(period).toLowerCase();
 
   return (
     <Card className="border-border bg-card">
       <CardHeader>
         <CardTitle className="font-heading text-xl">Spending Breakdown</CardTitle>
-        <CardDescription>Where your money went this month</CardDescription>
+        <CardDescription>Where your money went this {periodTitle}</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
@@ -81,7 +84,7 @@ export function ChartSection({ categories }: ChartSectionProps) {
         )}
         {total > 0 && (
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            Total spent: <span className="font-semibold text-foreground">{formatCurrency(total)}</span>
+            Total spent this {periodTitle}: <span className="font-semibold text-foreground">{formatCurrency(total)}</span>
           </p>
         )}
       </CardContent>

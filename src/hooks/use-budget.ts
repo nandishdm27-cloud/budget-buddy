@@ -1,21 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type BudgetData,
+  type BudgetPeriod,
   type Category,
   type Goal,
   type Transaction,
   DEFAULT_CATEGORIES,
   DEFAULT_GOALS,
   STORAGE_KEY,
+  getPeriodBudget,
 } from "@/components/budget/types";
 
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 function getDefaultData(): BudgetData {
   return {
     version: CURRENT_VERSION,
+    period: "monthly",
     transactions: [],
     categories: DEFAULT_CATEGORIES,
     goals: DEFAULT_GOALS,
@@ -28,13 +31,15 @@ function loadData(): BudgetData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getDefaultData();
     const parsed = JSON.parse(raw) as BudgetData;
-    if (parsed.version !== CURRENT_VERSION) return getDefaultData();
-    return {
+    const base = {
       ...getDefaultData(),
       ...parsed,
       categories: parsed.categories?.length ? parsed.categories : DEFAULT_CATEGORIES,
       goals: parsed.goals?.length ? parsed.goals : DEFAULT_GOALS,
     };
+    // Ensure period exists for older saved data
+    if (!base.period) base.period = "monthly";
+    return base;
   } catch {
     return getDefaultData();
   }
@@ -57,6 +62,10 @@ export function useBudget() {
   useEffect(() => {
     if (hydrated) saveData(data);
   }, [data, hydrated]);
+
+  const setPeriod = useCallback((period: BudgetPeriod) => {
+    setData((prev) => ({ ...prev, period }));
+  }, []);
 
   const addTransaction = useCallback((transaction: Omit<Transaction, "id">) => {
     setData((prev) => ({
@@ -122,6 +131,8 @@ export function useBudget() {
     setData(getDefaultData());
   }, []);
 
+  const { period } = data;
+
   const income = data.transactions
     .filter((t) => t.type === "income")
     .reduce((sum, t) => sum + t.amount, 0);
@@ -130,18 +141,28 @@ export function useBudget() {
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const totalBudget = data.categories.reduce((sum, c) => sum + c.budget, 0);
+  const totalBudget = useMemo(
+    () => data.categories.reduce((sum, c) => sum + getPeriodBudget(c.budget, period), 0),
+    [data.categories, period]
+  );
 
-  const categorySpending = data.categories.map((category) => ({
-    ...category,
-    spent: data.transactions
-      .filter((t) => t.type === "expense" && t.categoryId === category.id)
-      .reduce((sum, t) => sum + t.amount, 0),
-  }));
+  const categorySpending = useMemo(
+    () =>
+      data.categories.map((category) => ({
+        ...category,
+        budget: getPeriodBudget(category.budget, period),
+        spent: data.transactions
+          .filter((t) => t.type === "expense" && t.categoryId === category.id)
+          .reduce((sum, t) => sum + t.amount, 0),
+      })),
+    [data.categories, data.transactions, period]
+  );
 
   return {
     data,
     hydrated,
+    period,
+    setPeriod,
     income,
     expenses,
     balance: income - expenses,

@@ -12,17 +12,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Category, AccentColor } from "./types";
-import { ACCENT_COLORS } from "./types";
+import type { Category, AccentColor, BudgetPeriod } from "./types";
+import { ACCENT_COLORS, toMonthlyBudget, getPeriodTitle } from "./types";
 import { cn } from "@/lib/utils";
 
 interface AddCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  period: BudgetPeriod;
   onAdd: (category: Omit<Category, "id">) => void;
 }
 
-export function AddCategoryDialog({ open, onOpenChange, onAdd }: AddCategoryDialogProps) {
+export function AddCategoryDialog({ open, onOpenChange, period, onAdd }: AddCategoryDialogProps) {
   const [name, setName] = useState("");
   const [budget, setBudget] = useState("");
   const [color, setColor] = useState<AccentColor>("indigo");
@@ -39,7 +40,7 @@ export function AddCategoryDialog({ open, onOpenChange, onAdd }: AddCategoryDial
     if (!name.trim() || value <= 0) return;
     onAdd({
       name: name.trim(),
-      budget: value,
+      budget: toMonthlyBudget(value, period),
       color,
       icon: "more-horizontal",
     });
@@ -47,12 +48,16 @@ export function AddCategoryDialog({ open, onOpenChange, onAdd }: AddCategoryDial
     onOpenChange(false);
   };
 
+  const periodLabel = getPeriodTitle(period);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-border bg-card text-foreground sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading">Add Budget Category</DialogTitle>
-          <DialogDescription>Create a new category with a monthly spending limit.</DialogDescription>
+          <DialogDescription>
+            Create a new category with a {periodLabel.toLowerCase()} spending limit.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -68,7 +73,7 @@ export function AddCategoryDialog({ open, onOpenChange, onAdd }: AddCategoryDial
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category-budget">Monthly Budget</Label>
+            <Label htmlFor="category-budget">{periodLabel} Budget</Label>
             <Input
               id="category-budget"
               type="number"
