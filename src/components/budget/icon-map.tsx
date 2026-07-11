@@ -1,6 +1,9 @@
 import {
   BookOpen,
   Bus,
+  Coffee,
+  Cpu,
+  Code2,
   Gamepad2,
   HeartPulse,
   Home,
@@ -22,6 +25,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   zap: Zap,
   "shopping-bag": ShoppingBag,
   "heart-pulse": HeartPulse,
+  cpu: Cpu,
+  "code-2": Code2,
+  coffee: Coffee,
   "more-horizontal": MoreHorizontal,
 };
 
