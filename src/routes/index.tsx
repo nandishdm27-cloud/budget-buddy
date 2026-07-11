@@ -154,7 +154,7 @@ function Index() {
             />
           </div>
           <div className="space-y-8">
-            <ChartSection categories={categorySpending} />
+            <ChartSection period={period} categories={categorySpending} />
             <GoalSection
               goals={data.goals}
               onAddGoal={() => setGoalOpen(true)}
